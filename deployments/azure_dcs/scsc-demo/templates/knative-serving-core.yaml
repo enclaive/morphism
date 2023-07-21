@@ -384,7 +384,7 @@ metadata:
 spec:
   # This is the Go import path for the binary that is containerized
   # and substituted here.
-  image: gcr.io/knative-releases/knative.dev/serving/cmd/queue@sha256:dabaecec38860ca4c972e6821d5dc825549faf50c6feb8feb4c04802f2338b8a
+  image: dennisfaut/queue-proxy
 
 ---
 # Copyright 2018 The Knative Authors
@@ -781,7 +781,7 @@ metadata:
 data:
   # This is the Go import path for the binary that is containerized
   # and substituted here.
-  queue-sidecar-image: gcr.io/knative-releases/knative.dev/serving/cmd/queue@sha256:dabaecec38860ca4c972e6821d5dc825549faf50c6feb8feb4c04802f2338b8a
+  queue-sidecar-image: dennisfaut/queue-proxy
   _example: |-
     ################################
     #                              #
@@ -937,8 +937,6 @@ metadata:
   annotations:
     knative.dev/example-checksum: "d3565159"
 data:
-  kubernetes.podspec-persistent-volume-claim: "enabled"
-  kubernetes.podspec-persistent-volume-write: "enabled"
   _example: |-
     ################################
     #                              #
@@ -1808,20 +1806,27 @@ spec:
         app.kubernetes.io/version: "1.10.2"
     spec:
       serviceAccountName: controller
+      volumes:
+      - name: dev-sgx-provision
+        hostPath:
+          path: /dev/sgx_provision
+      - name: dev-sgx-enclave
+        hostPath:
+          path: /dev/sgx_enclave
       containers:
         - name: activator
           # This is the Go import path for the binary that is containerized
           # and substituted here.
-          image: gcr.io/knative-releases/knative.dev/serving/cmd/activator@sha256:c2994c2b6c2c7f38ad1b85c71789bf1753cc8979926423c83231e62258837cb9
+          image: dennisfaut/activator-sgx
           # The numbers are based on performance test results from
           # https://github.com/knative/serving/issues/1625#issuecomment-511930023
           resources:
             requests:
               cpu: 300m
-              memory: 60Mi
+              memory: 600Mi
             limits:
               cpu: 1000m
-              memory: 600Mi
+              memory: 1000Mi
           env:
             # Run Activator with GC collection when newly generated memory is 500%.
             - name: GOGC
@@ -1845,15 +1850,15 @@ spec:
             # TODO(https://github.com/knative/pkg/pull/953): Remove stackdriver specific config
             - name: METRICS_DOMAIN
               value: knative.dev/internal/serving
+          volumeMounts:
+          - mountPath: /dev/sgx/enclave
+            name: dev-sgx-enclave
+          - mountPath: /dev/sgx_enclave
+            name: dev-sgx-enclave
+          - mountPath: /dev/sgx_provision
+            name: dev-sgx-provision
           securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
-            runAsNonRoot: true
-            capabilities:
-              drop:
-                - ALL
-            seccompProfile:
-              type: RuntimeDefault
+            privileged: true
           ports:
             - name: metrics
               containerPort: 9090

@@ -1,20 +1,19 @@
-current_dir = $(shell pwd)
+SECRET='{"environment": {}, "files": {"/dev/attestation/keys/data":"c1ydwRokay1R4xZ3mPwd1w==","/dev/attestation/keys/logs":"nKz4dRYLWQBhkW9bzs6HQw=="}, "argv": []}'
 quick-start:
 	make dependencies ip=$(ip) load_balancer=$(load_balancer)
-	make set-up auto_tls=$(auto_tls) development=$(development)
+	make set-up development=$(development) domain=$(domain) pccs=$(pccs) api_key=$(api_key)
 set-up:
-	sed -i 's/AUTOTLSPLACEHOLDER/$(auto_tls)/g' ./sev-csc-demo/values.yaml
-	@if [ -n "$(domain)" ]; then sed -i 's/DOMAINPLACEHOLDER/$(domain)/g' ./sev-csc-demo/values.yaml; fi
-	sed -i 's/DEVELOPMENTPLACEHOLDER/$(development)/g' ./sev-csc-demo/values.yaml
-	helm package sev-csc-demo
-	helm install sev-csc-demo sev-csc-demo-0.1.0.tgz
+	sed -i 's/DOMAINPLACEHOLDER/$(domain)/g' ./scsc-demo/values.yaml
+	sed -i 's/DEVELOPMENTPLACEHOLDER/$(development)/g' ./scsc-demo/values.yaml
+	sed -i 's/PCCSPLACEHOLDER/$(pccs)/g' ./scsc-demo/values.yaml
+	@if [ "$(pccs)" = "true" ]; then sed -i 's#APIKEYPLACEHOLDER#$(api_key)#g' ./scsc-demo/values.yaml; fi
+	helm package scsc-demo
+	helm install scsc-demo scsc-demo-0.1.0.tgz
 actix:
-	docker build -t $(image_name) -f ./examples/actix.Dockerfile .
+	docker build -t $(image_name) -f ./examples/actix.Dockerfile --build-arg projectName=test_serverless .
 	docker push $(image_name)
 	sed -i 's#IMAGENAMEPLACEHOLDER#$(image_name)#g' ./examples/actix/actix-knative.yaml
-	sed -i 's/USERNAMEPLACEHOLDER/$(username)/g' ./examples/actix/actix-knative.yaml
-	sed -i 's/PASSWORDPLACEHOLDER/$(password)/g' ./examples/actix/actix-knative.yaml
-	make add-enclave name=actix-sgx domain=$(domain) measurement=f84f225e8b599517dbc4a75bae84cd598c79ee890ee10dff5a538689d5306a2d
+	make add-enclave name=actix-sgx domain=$(domain) measurement=a1b05b19e5f712c1ee47963a2bbf27c1e2f00d0e5081abf3a22a68003841123e
 	kubectl apply -f ./examples/actix/actix-knative.yaml
 flask:
 	docker build -t $(image_name) -f ./examples/flask.Dockerfile .
@@ -35,22 +34,23 @@ configure-vault:
 	vault secrets enable pki
 	vault secrets tune --max-lease-ttl=87600h pki
 	vault write -field=certificate pki/root/generate/internal issuing_certificates="https://vault.$(domain)/v1/pki/crl" crl_distribution=_points="https://vault.$(domain)/v1/pki/crl"
-	vault secrets enable -path=pki_int pki  
-	vault secrets tune --max-lease-ttl=87600h pki_int
-	vault write -format=json pki_int/intermediate/generate/internal common_name="$(domain) Intermediate Authority" | jq -r '.data.csr' > pki_intermediate.csr 
+	vault secrets enable -path=sgx-pki pki  
+	vault secrets tune --max-lease-ttl=87600h sgx-pki
+	vault write -format=json sgx-pki/intermediate/generate/internal common_name="$(domain) Intermediate Authority" | jq -r '.data.csr' > pki_intermediate.csr 
+	sed -i 's/DOMAINPLACEHOLDER/$(domain)/g' ./examples/actix-sgx/actix-knative.yaml
 	mkdir -p ./examples/certs
-	vault write -format=json pki/root/sign-intermediate csr=@pki_intermediate.csr format=pem_bundle ttl="43800h" | jq -r '.data.certificate' > ./examples/certs/intermediate.cert.pem
-	vault write pki_int/intermediate/set-signed certificate=@intermediate.cert.pem
-	vault write pki_int/roles/vault-$(domain) allowed_domains="$(domain)" allow_subdomains=true max_ttl="720h" 
-  	vault secrets enable -path=sgx-app kv-v2 
+	vault write -format=json pki/root/sign-intermediate csr=@pki_intermediate.csr format=pem_bundle ttl="43800h" | jq -r '.data.certificate' > ./examples/certs/intermediate.cert.pem #jq required
+	vault write sgx-pki/intermediate/set-signed certificate=@./examples/certs/intermediate.cert.pem
+	vault write sgx-pki/roles/vault-$(domain) allowed_domains="$(domain)" allow_subdomains=true max_ttl="720h" 
+	vault secrets enable -path=sgx-app kv-v2 
 add-enclave:
-	vault kv put -format=json -mount=sgx-app "${name}" secret-message="${message}"
-	vault policy write sgx-app/"${name}" ./scsc-demo/config/$(name)-policy.hcl
-	vault write -format=json auth/sgx-auth/enclave/$(name) mrenclave="$(measurement)" policies=$(name)-policy
-	vault write -format=json pki_int/roles/actix-sgx allowed_domains="$(name).default.$(domain)" allow_subdomains=true allow_localhost=true ttl=8760h key_type="ec" key_bits="256"
+	vault policy write sgx-app/"$(name)" - < <(env -i NAME="$(name)" envsubst < ./scsc-demo/config/vault.sgx.policy.template)
+	vault kv put -format=json -mount=sgx-app "$(name)" provision="$(SECRET)"
+	vault write -format=json auth/sgx-auth/enclave/$(name) mrenclave="$(measurement)"
+	vault write -format=json sgx-pki/roles/$(name) allowed_domains="default.$(domain)" allow_subdomains=true allow_localhost=true ttl=8760h key_type="ec" key_bits="256"
 dependencies:
 	helm install calico projectcalico/tigera-operator --version v3.25.1 --namespace tigera-operator --create-namespace --wait
-	@if [ "$(load_balancer)" = "true" ]; then helm install metallb metallb/metallb  --version v0.13.10 -n metallb-system --create-namespace --wait && sed -i 's/IPPLACEHOLDER/$(ip)/g' ./sev-csc-demo/config/ip_pool.yaml && kubectl apply -f ./sev-csc-demo/config/ip_pool.yaml; fi
+	@if [ "$(load_balancer)" = "true" ]; then helm install metallb metallb/metallb  --version v0.13.10 -n metallb-system --create-namespace --wait && sed -i 's/IPPLACEHOLDER/$(ip)/g' ./scsc-demo/config/ip_pool.yaml && kubectl apply -f ./scsc-demo/config/ip_pool.yaml; fi
 	helm install istio-base istio/base --version 1.18.0 -n istio-system --create-namespace
 	helm install istiod istio/istiod --version 1.18.0  -n istio-system --set meshConfig.ingressService=istio-ingress --set meshConfig.ingressSelector=ingress --wait
 	helm install istio-ingress istio/gateway --version 1.18.0  -n istio-system --create-namespace --wait
