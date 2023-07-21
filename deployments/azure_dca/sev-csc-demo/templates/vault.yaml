@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vault
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: vault
+  namespace: vault
+  labels:
+    service: vault
+spec:
+  containers:
+  - name: vault
+    image: hashicorp/vault
+    volumeMounts:
+    - mountPath: "/vault/file"
+      name: data
+    - mountPath: "/secrets/tmp/"
+      name: secrets
+    securityContext:
+      privileged: true
+    ports:
+      - containerPort: 8200
+    env:
+    -  name: VAULT_LOCAL_CONFIG
+       value: '{"storage": {"file": {"path": "/vault/file"}}, "listener": [{"tcp": { "address": "0.0.0.0:8200", "tls_cert_file": "/secrets/tmp/cert.pem", "tls_key_file": "/secrets/tmp/key.pem"}}], "default_lease_ttl": "168h", "max_lease_ttl": "720h", "ui": true}'
+    imagePullPolicy: Always
+    args: ["server"]
+  volumes:
+  - name: data
+    hostPath:
+      path: /etc/vault/data
+  - name: secrets
+    hostPath:
+      path: HOSTPATHPLACEHOLDER
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: vault
+  namespace: vault
+spec:
+  ports:
+  - port: 8200
+    protocol: TCP
+  selector:
+    service: vault

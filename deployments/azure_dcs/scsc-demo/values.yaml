@@ -1,0 +1,9 @@
+# Setting development to true, activates HTTP. If development is set to false, a wildcard certificate is expected to be used (use the command below)
+# kubectl create secret tls wildcard-tls --cert /path/to/cert.pem --key /path/to/key.pem
+development: DEVELOPMENTPLACEHOLDER
+# specify your domain here. Should be equivalent to the frontend host
+domain: DOMAINPLACEHOLDER
+# set this to true, if you are on bare-metal or your cloud provider does not have a global pccs deployed. (Set this to false on Azure)
+pccs: 
+  enable: PCCSPLACEHOLDER
+  api_key: APIKEYPLACEHOLDER

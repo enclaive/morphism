@@ -1,0 +1,22 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: vault-vs
+  annotations:
+    "helm.sh/hook": "post-install"
+    "helm.sh/hook-weight": "0"
+spec:
+  gateways:
+  - knative-serving/vault-gateway
+  hosts:
+  - vault.{{ .Values.domain }}
+  tls:
+  - match:
+    - port: 443
+      sniHosts:
+      - vault.{{ .Values.domain }}
+    route:
+    - destination:
+        host: enclaive-vault-sgx.vault.svc.cluster.local
+        port:
+          number: 8200

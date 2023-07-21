@@ -1,0 +1,23 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: shell-demo
+spec:
+  template:
+    spec:
+      containers:
+        - image: nginx
+          ports:
+            - containerPort: 8080
+          env:
+            - name: TARGET
+              value: "World"
+          volumeMounts:
+          - mountPath: /etc/test/data
+            name: test-data
+          securityContext:
+            privileged: true
+      volumes:
+      - name: test-data
+        hostPath:
+          path: /etc/test/data

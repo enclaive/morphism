@@ -1,0 +1,22 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: actix
+spec:
+  template:
+    spec:
+    # uncomment the block below, if you have enabled node Selector and change label:value
+    #  nodeSelector:
+    #    label:value
+      containers:
+        - image: IMAGENAMEPLACEHOLDER
+          ports:
+            - containerPort: 8080
+          imagePullPolicy: Always
+          env:
+          - name: path
+            value: '/usr/local/bin/test_serverless'
+          - name: user
+            value: 'USERNAMEPLACEHOLDER'
+          - name: password
+            value: 'PASSWORDPLACEHOLDER'

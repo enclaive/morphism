@@ -1,0 +1,21 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: vault-gateway
+  namespace: knative-serving
+  labels:
+    app.kubernetes.io/component: net-istio
+    app.kubernetes.io/name: knative-serving
+    app.kubernetes.io/version: "1.10.1"
+spec:
+  selector:
+    istio: ingress
+  servers:
+    - port:
+        number: 443
+        name: https_
+        protocol: HTTPS
+      tls: 
+        mode: PASSTHROUGH
+      hosts:
+        - "vault.{{ .Values.domain }}"

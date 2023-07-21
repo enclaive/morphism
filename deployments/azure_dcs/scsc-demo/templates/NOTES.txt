@@ -1,0 +1,2 @@
+Knative and Vault installed successfully!
+If auto-tls is activated, it could take several seconds, until the certificate is received..

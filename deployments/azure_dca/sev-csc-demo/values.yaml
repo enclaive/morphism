@@ -1,0 +1,7 @@
+# Setting development to true, activates HTTP. If set development and auto_tls is set to false, a wildcard certificate is expected to be used (use the command below)
+# kubectl create secret tls wildcard-tls --cert /path/to/cert.pem --key /path/to/key.pem
+development: DEVELOPMENTPLACEHOLDER
+# specify your domain here. Should be equivalent to the frontend host
+domain: DOMAINPLACEHOLDER
+# specify if you want to enable Knative auto-tls here. Requires cert-manager
+auto_tls: AUTOTLSPLACEHOLDER

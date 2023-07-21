@@ -1,0 +1,24 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: flask
+spec:
+  template:
+    spec:
+    # uncomment the block below, if you have enabled node Selector and change label:value
+    #  nodeSelector:
+    #    label:value
+      containers:
+        - image: IMAGENAMEPLACEHOLDER
+          ports:
+            - containerPort: 5000
+          imagePullPolicy: Always
+          env:
+          - name: path
+            value: 'python3'
+          - name: user
+            value: 'USERNAMEPLACEHOLDER'
+          - name: password
+            value: 'PASSWORDPLACEHOLDER'
+          - name: FLASK_APP
+            value: /app/app.py

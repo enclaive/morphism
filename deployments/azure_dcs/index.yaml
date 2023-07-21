@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  scsc-demo:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2023-06-24T03:19:04.101176881+02:00"
+    description: A Helm chart for Kubernetes
+    digest: 35425ea07ad752a5b6c1ca60df26fce589a395ed29ec677b6cbb6af6ad1f2142
+    name: scsc-demo
+    type: application
+    urls:
+    - https://elonwallet-io.github.io/SCSC-Example/scsc-demo-0.1.0.tgz
+    version: 0.1.0
+generated: "2023-06-24T03:19:04.099426277+02:00"
