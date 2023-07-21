@@ -1,3 +1,0 @@
-[submodule "serving"]
-	path = serving
-	url = https://github.com/knative/serving.git
