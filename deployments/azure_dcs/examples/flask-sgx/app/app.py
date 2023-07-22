@@ -1,8 +1,8 @@
 from flask import Flask
-import os
-secret = os.gentenv('secret-message')
+
 app = Flask(__name__)
 
-@app.route('/read_secret', methods=['GET'])
-def read_secret():
-    return secret
+
+@app.route('/hello_world', methods=['GET'])
+def hello_world():
+    return "hello world SGX!"

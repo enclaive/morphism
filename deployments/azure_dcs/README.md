@@ -1,4 +1,3 @@
 # Strong Confidential Serverless Containers (SCSC) example
-## DISCLAIMER
-Currently, Gateway to Queue Proxy or Gateway to Activator does not support TLS in Knative. The Knative dev's are currently still working on this. The problem is that Knative dynamically changes routes to put the queue proxy or activator behind the gateway. Currently only HTTP routes are used here with the HTTP header modified by Istio. Istio does not offer this option for TLS. Tried to change the routes to TLS, which resulted in Knative not working anymore, because on the one hand a network controller, the proxies and the Autoscaler need the metrics. Therefore, the Activator as well as the queue proxy cannot currently have a TLS endpoint. Only in the route Activato to Queue-Proxy this would be possible, but this alone does not make sense. This will be implemented as soon as the Knative dev's are finished.
+
 ## [Tutorial can be found here](https://morphisms.gitbook.io/morphisms-confidential-serverless-containers/getting-started/intel-sgx) 

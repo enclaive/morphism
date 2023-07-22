@@ -21,7 +21,7 @@ flask:
 	sed -i 's#IMAGENAMEPLACEHOLDER#$(image_name)#g' ./examples/flask/flask-knative.yaml
 	sed -i 's/USERNAMEPLACEHOLDER/$(username)/g' ./examples/flask/flask-knative.yaml
 	sed -i 's/PASSWORDPLACEHOLDER/$(password)/g' ./examples/flask/flask-knative.yaml
-	make add-enclave name=flask-sgx domain=$(domain) measurement=f84f225e8b599517dbc4a75bae84cd598c79ee890ee10dff5a538689d5306a2d
+	make add-enclave name=flask-sgx domain=$(domain) measurement=14d9b37ef04fda235d64333a08fee9b33422508f475f8e0040832fbb043daf26
 	kubectl apply -f ./examples/flask/flask-knative.yaml
 add-helm-repos:
 	helm repo add projectcalico https://docs.tigera.io/calico/charts

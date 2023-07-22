@@ -19,6 +19,7 @@ FROM gramineproject/gramine:v1.4
 COPY ./examples/actix-sgx/packages.txt .
 RUN apt-get update && xargs -a packages.txt -r apt-get install -y && apt-get install -y --no-install-recommends libsgx-dcap-default-qpl && rm -rf packages.txt /var/lib/apt/lists/*
 COPY ./examples/sgx_default_qcnl.conf /etc/
+# TODO: Copy binary instead from golang
 COPY --from=build-env /usr/local/go/ /usr/local/go/
 ENV PATH="/usr/local/go/bin:${PATH}"
 # Copy executable

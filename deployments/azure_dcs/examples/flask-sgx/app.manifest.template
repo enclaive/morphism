@@ -1,20 +1,20 @@
 loader.entrypoint = "file:{{ gramine.libos }}"
-libos.entrypoint = "/usr/bin/python3"
+libos.entrypoint = "/app/premain"
 loader.argv_src_file = "file:/app/args.txt"
 loader.env.ENCLAIVE_NAME = "flask-sgx"
 loader.env.domain = { passthrough = true }
 loader.env.ENCLAIVE_SERVER = { passthrough = true }
-loader.env.path = "python3"
 loader.env.FLASK_APP = "/app/app.py"
 loader.log_level = "error"
-
+sgx.remote_attestation = "dcap"
 
 loader.env.LD_LIBRARY_PATH = "/lib:{{ arch_libdir }}"
 loader.env.MALLOC_ARENA_MAX = "1"
 
 sgx.nonpie_binary = true
 
-
+fs.root.uri = "file:/"
+fs.start_dir = "/app"
 fs.mounts = [
     { path= "/secrets/tmp", type="tmpfs"},
     { path = "/tmp",              uri = "file:/tmp",        type = "tmpfs" },
@@ -26,12 +26,15 @@ fs.mounts = [
 
 ]
 sgx.rpc_thread_num = 16
-sgx.max_threads = 16
+sgx.thread_num = 16
+sgx.max_threads = 20
+sgx.enclave_size = "2G"
 sgx.edmm_enable = {{ 'true' if env.get('EDMM', '0') == '1' else 'false' }}
 sgx.debug = false
-sgx.isvprodid = 1
-sgx.isvsvn    = 1
-sgx.remote_attestation = "dcap"
+
+sgx.allowed_files = [
+  "file:/",
+]
 
 sgx.trusted_files = [
     "file:{{ gramine.libos }}",

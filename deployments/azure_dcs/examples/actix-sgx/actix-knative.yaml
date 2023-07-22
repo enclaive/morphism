@@ -9,7 +9,7 @@ spec:
     #  nodeSelector:
     #    label:value
       containers:
-        - image: dennisfaut/actix-sgx
+        - image: IMAGENAMEPLACEHOLDER
           ports:
             - containerPort: 8080
           imagePullPolicy: Always

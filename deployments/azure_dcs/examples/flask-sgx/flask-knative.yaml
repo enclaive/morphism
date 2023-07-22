@@ -1,7 +1,7 @@
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: flask
+  name: flask-sgx
 spec:
   template:
     spec:
@@ -15,7 +15,9 @@ spec:
           imagePullPolicy: Always
           env:
           - name: ENCLAIVE_SERVER
-            value: "https://vault.DOMAINPLACEHOLDER"
+            value: "https://enclaive-vault-sgx.vault.svc.cluster.local:8200"
+          - name: domain
+            value: DOMAINPLACEHOLDER
           volumeMounts:
           - mountPath: /dev/sgx/enclave
             name: dev-sgx-enclave
