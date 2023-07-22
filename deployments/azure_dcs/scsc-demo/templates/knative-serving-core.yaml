@@ -384,7 +384,7 @@ metadata:
 spec:
   # This is the Go import path for the binary that is containerized
   # and substituted here.
-  image: dennisfaut/queue-sgx
+  image: dennisfaut/queue-proxy
 
 ---
 # Copyright 2018 The Knative Authors
@@ -781,7 +781,7 @@ metadata:
 data:
   # This is the Go import path for the binary that is containerized
   # and substituted here.
-  queue-sidecar-image: dennisfaut/queue-sgx
+  queue-sidecar-image: dennisfaut/queue-proxy
   _example: |-
     ################################
     #                              #
@@ -2116,7 +2116,7 @@ spec:
         - name: controller
           # This is the Go import path for the binary that is containerized
           # and substituted here.
-          image: gcr.io/knative-releases/knative.dev/serving/cmd/controller@sha256:98a2cc7fd62ee95e137116504e7166c32c65efef42c3d1454630780410abf943
+          image: gcr.io/knative-releases/knative.dev/net-istio/cmd/controller@sha256:421aa67057240fa0c56ebf2c6e5b482a12842005805c46e067129402d1751220
           resources:
             requests:
               cpu: 100m

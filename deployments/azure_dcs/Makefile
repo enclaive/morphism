@@ -13,7 +13,7 @@ actix:
 	docker build -t $(image_name) -f ./examples/actix.Dockerfile --build-arg projectName=test_serverless .
 	docker push $(image_name)
 	sed -i 's#IMAGENAMEPLACEHOLDER#$(image_name)#g' ./examples/actix/actix-knative.yaml
-	make add-enclave name=actix-sgx domain=$(domain) measurement=a1b05b19e5f712c1ee47963a2bbf27c1e2f00d0e5081abf3a22a68003841123e
+	make add-enclave name=actix-sgx domain=$(domain) measurement=40aae473bbc5963693bd3a230d70dd38794daef04edd9a8ec50ba58078ecc457
 	kubectl apply -f ./examples/actix/actix-knative.yaml
 flask:
 	docker build -t $(image_name) -f ./examples/flask.Dockerfile .
@@ -39,13 +39,13 @@ configure-vault:
 	vault write -format=json sgx-pki/intermediate/generate/internal common_name="$(domain) Intermediate Authority" | jq -r '.data.csr' > pki_intermediate.csr 
 	sed -i 's/DOMAINPLACEHOLDER/$(domain)/g' ./examples/actix-sgx/actix-knative.yaml
 	mkdir -p ./examples/certs
-	vault write -format=json pki/root/sign-intermediate csr=@pki_intermediate.csr format=pem_bundle ttl="43800h" | jq -r '.data.certificate' > ./examples/certs/intermediate.cert.pem #jq required
+	vault write -format=json pki/root/sign-intermediate csr=@pki_intermediate.csr format=pem_bundle ttl="43800h" | jq -r '.data.certificate' > ./examples/certs/intermediate.cert.pem 
 	vault write sgx-pki/intermediate/set-signed certificate=@./examples/certs/intermediate.cert.pem
 	vault write sgx-pki/roles/vault-$(domain) allowed_domains="$(domain)" allow_subdomains=true max_ttl="720h" 
 	vault secrets enable -path=sgx-app kv-v2 
 add-enclave:
-	vault policy write sgx-app/"$(name)" - < <(env -i NAME="$(name)" envsubst < ./scsc-demo/config/vault.sgx.policy.template)
-	vault kv put -format=json -mount=sgx-app "$(name)" provision="$(SECRET)"
+	bash -c "vault policy write sgx-app/"$(name)" - < <(env -i NAME="$(name)" envsubst < ./scsc-demo/config/vault.sgx.policy.template)"
+	vault kv put -format=json -mount=sgx-app "$(name)" provision=$(SECRET)
 	vault write -format=json auth/sgx-auth/enclave/$(name) mrenclave="$(measurement)"
 	vault write -format=json sgx-pki/roles/$(name) allowed_domains="default.$(domain)" allow_subdomains=true allow_localhost=true ttl=8760h key_type="ec" key_bits="256"
 dependencies:
