@@ -13,13 +13,15 @@ actix:
 	docker build -t $(image_name) -f ./examples/actix.Dockerfile --build-arg projectName=test_serverless .
 	docker push $(image_name)
 	sed -i 's#IMAGENAMEPLACEHOLDER#$(image_name)#g' ./examples/actix-sgx/actix-knative.yaml
+	sed -i 's/DOMAINPLACEHOLDER/$(domain)/g'  ./examples/actix-sgx/actix-knative.yaml
 	make add-enclave name=actix-sgx domain=$(domain) measurement=40aae473bbc5963693bd3a230d70dd38794daef04edd9a8ec50ba58078ecc457
 	kubectl apply -f ./examples/actix-sgx/actix-knative.yaml
 flask:
 	docker build -t $(image_name) -f ./examples/flask.Dockerfile .
 	docker push $(image_name)
 	sed -i 's#IMAGENAMEPLACEHOLDER#$(image_name)#g' ./examples/flask-sgx/flask-knative.yaml
-	make add-enclave name=flask-sgx domain=$(domain) measurement=68f02e96a307ba2d9544ba6569bc8b8c81789c0455227f3f659f2e86df85810a
+	sed -i 's/DOMAINPLACEHOLDER/$(domain)/g' ./examples/flask-sgx/flask-knative.yaml
+	make add-enclave name=flask-sgx domain=$(domain) measurement=9594bd3a75862128b9c2bf12d79488641192ff59320ba90b45814051b8ca9290
 	kubectl apply -f ./examples/flask-sgx/flask-knative.yaml
 add-helm-repos:
 	helm repo add projectcalico https://docs.tigera.io/calico/charts
