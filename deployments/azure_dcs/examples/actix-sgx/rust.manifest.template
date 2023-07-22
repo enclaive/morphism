@@ -1,0 +1,34 @@
+loader.entrypoint = "file:{{ gramine.libos }}"
+libos.entrypoint = "/app/premain"
+
+loader.argv = [ "/app/app"]
+loader.env.ENCLAIVE_NAME = "actix-sgx"
+loader.log_level = "debug"
+loader.env.ENCLAIVE_SERVER = { passthrough = true }
+loader.env.domain = { passthrough = true }
+loader.env.LD_LIBRARY_PATH = "/lib:{{ arch_libdir }}"
+sgx.thread_num = 16
+sgx.max_threads = 20
+sgx.enclave_size = "2G"
+sgx.remote_attestation = "dcap"
+sgx.debug = false
+
+# actix web has a dependency of the rust tokio package 
+# which requires eventfd
+sys.insecure__allow_eventfd = true
+
+fs.root.uri = "file:/"
+fs.start_dir = "/app"
+
+fs.mounts = [
+    { path = "/secrets/tmp",      type = "tmpfs" },
+    { path = "/tmp",              type = "tmpfs" },
+    { path = "/etc",              uri = "file:/etc" },
+    { path = "/usr",              uri = "file:/usr" },
+    { path = "/lib",              uri = "file:{{ gramine.runtimedir() }}" },
+    { path = "{{ arch_libdir }}", uri = "file:{{ arch_libdir }}" },
+
+]
+sgx.allowed_files = [
+  "file:/",
+]

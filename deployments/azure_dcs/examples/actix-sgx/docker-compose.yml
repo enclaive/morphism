@@ -1,0 +1,19 @@
+version: '2'
+
+services:
+  rust-sgx:
+    privileged: true
+    image: dennisfaut/sgx-signer-debug:latest
+    container_name: "rust-sgx"
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket
+      - /home/azureuser/perf.data:/entrypoint/perf.data
+      - /home/azureuser/sgx-perf-9.data:/entrypoint/sgx-perf-9.data
+      - /home/azureuser/test.data:/entrypoint/test.data
+    devices:
+      - "/dev/sgx_enclave:/dev/sgx_enclave"
+    stdin_open: true              # docker run -i
+    tty: true                     # docker run -t
+

@@ -1,0 +1,34 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: flask
+spec:
+  template:
+    spec:
+    # uncomment the block below, if you have enabled node Selector and change label:value
+    #  nodeSelector:
+    #    label:value
+      containers:
+        - image: IMAGENAMEPLACEHOLDER
+          ports:
+            - containerPort: 5000
+          imagePullPolicy: Always
+          env:
+          - name: ENCLAIVE_SERVER
+            value: "https://vault.DOMAINPLACEHOLDER"
+          volumeMounts:
+          - mountPath: /dev/sgx/enclave
+            name: dev-sgx-enclave
+          - mountPath: /dev/sgx_enclave
+            name: dev-sgx-enclave
+          - mountPath: /dev/sgx_provision
+            name: dev-sgx-provision
+          securityContext:
+            privileged: true
+      volumes:
+      - name: dev-sgx-provision
+        hostPath:
+          path: /dev/sgx_provision
+      - name: dev-sgx-enclave
+        hostPath:
+          path: /dev/sgx_enclave

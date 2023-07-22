@@ -1,0 +1,12 @@
+version: '2'
+
+services:
+  python-sgx:
+    image: dennisfaut/python-sgx
+    container_name: "python-sgx"
+    build:
+      context: .
+    ports:
+      - "5000:5000"
+    devices:
+      - "/dev/sgx_enclave:/dev/sgx_enclave"
