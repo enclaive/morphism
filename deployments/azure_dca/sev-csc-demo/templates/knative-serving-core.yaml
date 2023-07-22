@@ -1387,6 +1387,7 @@ data:
   {{- if and (.Values.auto_tls) (not .Values.development)}}
   auto-tls: "Enabled"
   {{- end }}
+  internal-encryption: "true"
   _example: |
     ################################
     #                              #
