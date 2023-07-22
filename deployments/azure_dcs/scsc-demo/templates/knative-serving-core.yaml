@@ -384,7 +384,7 @@ metadata:
 spec:
   # This is the Go import path for the binary that is containerized
   # and substituted here.
-  image: dennisfaut/queue-proxy
+  image: dennisfaut/queue-sgx
 
 ---
 # Copyright 2018 The Knative Authors
@@ -781,7 +781,7 @@ metadata:
 data:
   # This is the Go import path for the binary that is containerized
   # and substituted here.
-  queue-sidecar-image: dennisfaut/queue-proxy
+  queue-sidecar-image: dennisfaut/queue-sgx
   _example: |-
     ################################
     #                              #
@@ -1823,10 +1823,10 @@ spec:
           resources:
             requests:
               cpu: 300m
-              memory: 600Mi
+              memory: 800Mi
             limits:
               cpu: 1000m
-              memory: 1000Mi
+              memory: 1300Mi
           env:
             # Run Activator with GC collection when newly generated memory is 500%.
             - name: GOGC
