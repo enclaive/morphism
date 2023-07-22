@@ -2,6 +2,11 @@
 ARG projectName
 # build stage
 FROM golang:latest as build-env
+ENV CGO_ENABLED=0
+
+COPY ./examples/vault-sgx-plugin/ /app/
+WORKDIR /app/
+RUN go build -o premain  -buildmode=pie -ldflags="-extldflags=-static -w" ./cmd/premain-app
 FROM rust:latest AS builder
 ARG projectName
 
@@ -19,15 +24,12 @@ FROM gramineproject/gramine:v1.4
 COPY ./examples/actix-sgx/packages.txt .
 RUN apt-get update && xargs -a packages.txt -r apt-get install -y && apt-get install -y --no-install-recommends libsgx-dcap-default-qpl && rm -rf packages.txt /var/lib/apt/lists/*
 COPY ./examples/sgx_default_qcnl.conf /etc/
-# TODO: Copy binary instead from golang
-COPY --from=build-env /usr/local/go/ /usr/local/go/
-ENV PATH="/usr/local/go/bin:${PATH}"
 # Copy executable
+
 WORKDIR /app/
-ENV CGO_ENABLED=0
+COPY --from=build-env /app/premain /app/
 COPY --from=builder /test_serverless/target/release/test_serverless ./app
-COPY ./examples/vault-sgx-plugin/ ./
-RUN go build -o premain  -buildmode=pie -ldflags="-extldflags=-static -w" ./cmd/premain-app
+
 # Copy required files
 
 COPY ./examples/actix-sgx/rust.manifest.template ./

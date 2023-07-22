@@ -1806,27 +1806,20 @@ spec:
         app.kubernetes.io/version: "1.10.2"
     spec:
       serviceAccountName: controller
-      volumes:
-      - name: dev-sgx-provision
-        hostPath:
-          path: /dev/sgx_provision
-      - name: dev-sgx-enclave
-        hostPath:
-          path: /dev/sgx_enclave
       containers:
         - name: activator
           # This is the Go import path for the binary that is containerized
           # and substituted here.
-          image: dennisfaut/activator-sgx
+          image: gcr.io/knative-releases/knative.dev/serving/cmd/activator@sha256:c2994c2b6c2c7f38ad1b85c71789bf1753cc8979926423c83231e62258837cb9
           # The numbers are based on performance test results from
           # https://github.com/knative/serving/issues/1625#issuecomment-511930023
           resources:
             requests:
               cpu: 300m
-              memory: 600Mi
+              memory: 60Mi
             limits:
               cpu: 1000m
-              memory: 1000Mi
+              memory: 600Mi
           env:
             # Run Activator with GC collection when newly generated memory is 500%.
             - name: GOGC
@@ -1850,15 +1843,15 @@ spec:
             # TODO(https://github.com/knative/pkg/pull/953): Remove stackdriver specific config
             - name: METRICS_DOMAIN
               value: knative.dev/internal/serving
-          volumeMounts:
-          - mountPath: /dev/sgx/enclave
-            name: dev-sgx-enclave
-          - mountPath: /dev/sgx_enclave
-            name: dev-sgx-enclave
-          - mountPath: /dev/sgx_provision
-            name: dev-sgx-provision
           securityContext:
-            privileged: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
           ports:
             - name: metrics
               containerPort: 9090

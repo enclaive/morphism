@@ -12,17 +12,15 @@ set-up:
 actix:
 	docker build -t $(image_name) -f ./examples/actix.Dockerfile --build-arg projectName=test_serverless .
 	docker push $(image_name)
-	sed -i 's#IMAGENAMEPLACEHOLDER#$(image_name)#g' ./examples/actix/actix-knative.yaml
+	sed -i 's#IMAGENAMEPLACEHOLDER#$(image_name)#g' ./examples/actix-sgx/actix-knative.yaml
 	make add-enclave name=actix-sgx domain=$(domain) measurement=40aae473bbc5963693bd3a230d70dd38794daef04edd9a8ec50ba58078ecc457
-	kubectl apply -f ./examples/actix/actix-knative.yaml
+	kubectl apply -f ./examples/actix-sgx/actix-knative.yaml
 flask:
 	docker build -t $(image_name) -f ./examples/flask.Dockerfile .
 	docker push $(image_name)
-	sed -i 's#IMAGENAMEPLACEHOLDER#$(image_name)#g' ./examples/flask/flask-knative.yaml
-	sed -i 's/USERNAMEPLACEHOLDER/$(username)/g' ./examples/flask/flask-knative.yaml
-	sed -i 's/PASSWORDPLACEHOLDER/$(password)/g' ./examples/flask/flask-knative.yaml
-	make add-enclave name=flask-sgx domain=$(domain) measurement=14d9b37ef04fda235d64333a08fee9b33422508f475f8e0040832fbb043daf26
-	kubectl apply -f ./examples/flask/flask-knative.yaml
+	sed -i 's#IMAGENAMEPLACEHOLDER#$(image_name)#g' ./examples/flask-sgx/flask-knative.yaml
+	make add-enclave name=flask-sgx domain=$(domain) measurement=68f02e96a307ba2d9544ba6569bc8b8c81789c0455227f3f659f2e86df85810a
+	kubectl apply -f ./examples/flask-sgx/flask-knative.yaml
 add-helm-repos:
 	helm repo add projectcalico https://docs.tigera.io/calico/charts
 	helm repo add metallb https://metallb.github.io/metallb

@@ -25,6 +25,6 @@ Currently, deploying an enclaved Queue-Proxy works, but additional configuration
 
 Enclaving the Webhook and Controller is not required, since they are only used for Deployment and the Kubernetes API is in the threat model included. Through remote attestation misconfiguration is detected.
 
-Activator is enclaved and works. 
+Activator also needs some work as health probes on it's enclaved version fail currently and crashes after some minutes.
 
 Currently, Gateway to Queue Proxy or Gateway to Activator does not support TLS in Knative. The Knative dev's are currently still working on this. The problem is that Knative dynamically changes routes to put the queue proxy or activator behind the gateway. Currently only HTTP routes are used here with the HTTP header modified by Istio. Istio does not offer this option for TLS. Tried to change the routes to TLS, which resulted in Knative not working anymore, because on the one hand a network controller, the proxies and the Autoscaler need the metrics. Therefore, the Activator as well as the queue proxy cannot currently have a TLS endpoint. Only in the route Activato to Queue-Proxy this would be possible, but this alone does not make sense. This will be implemented as soon as the Knative dev's are finished.
