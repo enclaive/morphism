@@ -1867,8 +1867,8 @@ spec:
               httpHeaders:
                 - name: k-kubelet-probe
                   value: "activator"
-            periodSeconds: 5
-            failureThreshold: 5
+            periodSeconds: 15
+            failureThreshold: 20
           livenessProbe:
             httpGet:
               port: 8012
@@ -1877,7 +1877,7 @@ spec:
                   value: "activator"
             periodSeconds: 10
             failureThreshold: 12
-            initialDelaySeconds: 15
+            initialDelaySeconds: 25
       # The activator (often) sits on the dataplane, and may proxy long (e.g.
       # streaming, websockets) requests.  We give a long grace period for the
       # activator to "lame duck" and drain outstanding requests before we
